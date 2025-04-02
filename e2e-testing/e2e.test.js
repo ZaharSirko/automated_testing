@@ -20,7 +20,7 @@ describe("Steam UI Tests Ukrainian language", () => {
 
 
     test("should search for a game and check if it appears in results", async () => {
-        const gameName = "Half-Life";
+        const gameName = "S.T.A.L.K.E.R. 2: Heart of Chornobyl";
     
         const searchInput = await page.waitForSelector("#store_nav_search_term");
         await searchInput.type(gameName);
@@ -36,7 +36,7 @@ describe("Steam UI Tests Ukrainian language", () => {
         }, gameName);
     
         expect(gameExists).toBe(true);
-    });
+    }, 15000);
     
     test("should add a game to the cart", async () => {
         const gameName = "Half-Life";
@@ -65,6 +65,47 @@ describe("Steam UI Tests Ukrainian language", () => {
         expect(cartContent).toContain(gameName);
     },15000);
 
+
+    test("should navigate to the Steam Support page", async () => {
+        await page.click("#responsive_menu_logo");
+   
+        const supportSelection = await page.waitForSelector("a.menuitem[href*='help.steampowered.com']");
+        await supportSelection.click();
+
+        await page.waitForNavigation();
+
+        const title = await page.title();
+        expect(title).toContain("Служба підтримки Steam");
+    }, 10000);
+
+
+
+    test("should navigate to the About page and verify the Install Steam button", async () => {
+        await page.click("#responsive_menu_logo");
+    
+
+        const aboutSelection = await page.waitForSelector("a.menuitem[href*='store.steampowered.com/about/']");
+        await aboutSelection.click();
+    
+        await page.waitForNavigation();
+        
+     
+        const title = await page.title();
+        expect(title).toContain("Steam — найкраща мережева ігрова платформа");
+    
+
+        const installButtonSelector = "a.about_install_steam_link";
+        await page.waitForSelector(installButtonSelector);
+        
+        const buttonExists = await page.$(installButtonSelector) !== null;
+        expect(buttonExists).toBe(true);
+    
+
+        const installLink = await page.$eval(installButtonSelector, (el) => el.href);
+        expect(installLink).toBe("https://cdn.fastly.steamstatic.com/client/installer/SteamSetup.exe");
+    }, 10000);
+    
+
     test("sould change language to English", async () => {
         await page.goto("https://store.steampowered.com/");
         
@@ -82,7 +123,5 @@ describe("Steam UI Tests Ukrainian language", () => {
         const title = await page.title();
         expect(title).toBe("Welcome to Steam");
     },15000);
-
-
 
 });
