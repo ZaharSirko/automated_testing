@@ -32,71 +32,29 @@ describe("Steam UI Tests Ukrainian language", () => {
         expect(resultsTitle).toContain("Пошук Steam");
     });
 
+    test("should open login page", async () => {
 
-    test("should search for a game and check if it appears in results", async () => {
-        const gameName = "Half-Life";
-    
-        const searchInput = await page.waitForSelector("#store_nav_search_term");
-        await searchInput.type(gameName);
-        await searchInput.press("Enter");
-    
-        await page.waitForNavigation();
-    
-        await page.waitForSelector(".search_result_row");
-
-        const gameExists = await page.evaluate((gameName) => {
-            const items = Array.from(document.querySelectorAll(".search_result_row"));
-            return items.some((item) => item.innerText.includes(gameName));
-        }, gameName);
-    
-        expect(gameExists).toBe(true);
-    });
-    
-    test("should add a game to the cart", async () => {
-        const gameName = "Half-Life";
-    
-        const searchInput = await page.waitForSelector("#store_nav_search_term");
-        await searchInput.type(gameName);
-        await searchInput.press("Enter");
-    
-        await page.waitForNavigation();
-        await page.waitForSelector(".search_result_row");
-
-        const firstGame = await page.$(".search_result_row");
-        await firstGame.click();
-    
-        await page.waitForNavigation();
-        await page.waitForSelector(".btn_addtocart");
-
-        await page.click(".btn_addtocart");
-
-        await page.waitForSelector(".DialogButton._DialogLayout.Primary.Focusable");    
-        await page.click(".DialogButton._DialogLayout.Primary.Focusable")
-        await page.waitForNavigation();
-    
-
-        const cartContent = await page.$eval(".Panel.Focusable", (el) => el.innerText);
-        expect(cartContent).toContain(gameName);
-    },15000);
-
-    test("sould change language to English", async () => {
-        await page.goto("https://store.steampowered.com/");
-        
         await page.click("#responsive_menu_logo");
-        
-        const languageSelector = await page.waitForSelector(".menuitem.change_language_action");
-        await languageSelector.click();
+        await page.click(".mainmenu_contents_items .menuitem");
 
-        
-        const englishOption = await page.waitForSelector(".responsive_change_language_select");
-        await englishOption.select("english");
-    
+        const loginTitle = await page.title();
+        expect(loginTitle).toContain("Увійти");
+    });
+
+
+    test("should open home page", async () => {
+        await page.click(".responsive_header_logo");
         await page.waitForNavigation();
 
-        const title = await page.title();
-        expect(title).toBe("Welcome to Steam");
-    },15000);
+        const homeTitle = await page.title();
+        expect(homeTitle).toContain("Вітаємо у Steam");
+    });
 
-
+    test("should display user reviews", async () => {
+        await page.goto("https://store.steampowered.com/app/70/Half_Life/");
+        await page.waitForSelector(".user_reviews_summary_row");
+        const reviewText = await page.$eval(".user_reviews_summary_row", (el) => el.innerText);
+        expect(reviewText.length).toBeGreaterThan(0);
+    });
 
 });
